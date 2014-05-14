@@ -1,6 +1,7 @@
 #coding: utf-8
 import inspect
 import itertools
+import sys
 from . import mommy
 from .timezone import tz_aware
 from .exceptions import RecipeNotFound, RecipeIteratorEmpty
@@ -9,6 +10,15 @@ from six import string_types
 import datetime
 
 finder = mommy.ModelFinder()
+
+if sys.version_info[0] == 2 and sys.version_info[1] < 7:
+    def _count(increment_by):
+        for n in itertools.count(1):
+            yield value + increment_by * type(value)(n)
+else:
+    count = itertools.count
+
+
 
 class Recipe(object):
     def __init__(self, model, **attrs):
@@ -77,7 +87,6 @@ def foreign_key(recipe):
     """
     return RecipeForeignKey(recipe)
 
-
 def seq(value, increment_by=1):
     if type(value) in {datetime.datetime, datetime.date,  datetime.time}:
         if type(value) is datetime.date:
@@ -89,7 +98,7 @@ def seq(value, increment_by=1):
         # convert to epoch time
         start = (date - datetime.datetime(1970,1,1)).total_seconds()
         increment_by =  increment_by.total_seconds()
-        for n in itertools.count(increment_by, increment_by):
+        for n in count(increment_by, increment_by):
             series_date = tz_aware(datetime.datetime.utcfromtimestamp(start + n))
             if type(value) is datetime.time:
                 yield series_date.time()
@@ -98,7 +107,7 @@ def seq(value, increment_by=1):
             else:
                 yield series_date
     else:
-        for n in itertools.count(increment_by, increment_by):
+        for n in count(increment_by, increment_by):
             yield value + type(value)(n)
 
 class related(object):
