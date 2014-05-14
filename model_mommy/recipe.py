@@ -72,8 +72,9 @@ def foreign_key(recipe):
 
 
 def seq(value, increment_by=1):
-    for n in itertools.count(increment_by, increment_by):
-        yield value + type(value)(n)
+    for n in itertools.count(1):
+        yield value + increment_by * type(value)(n)
+
 
 class related(object):
     def __init__(self, *args):
